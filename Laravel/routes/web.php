@@ -32,6 +32,9 @@ Route::get('/course/{course_id}/add_student', [CourseController::class, 'showAdd
 Route::post('/course/{course_id}/enroll', [CourseController::class, 'enrollStudent'])->name('course.enroll');
 Route::post('/course/create', [CourseController::class, 'uploadCourseFile'])->name('course.upload');
 
+// Download JSON template
+Route::get('/course/template/download', [CourseController::class, 'downloadTemplate'])->name('course.template.download');
+
 // Route to store the new assessment
 Route::post('/course/{id}/assessments', [AssessmentController::class, 'store'])->name('assessments.store');
 // Route to display the edit form for an assessment
@@ -55,8 +58,7 @@ Route::get('/course/{course_id}/assessment/{assessment_id}/student/{student_id}'
     // Route for submitting score
 Route::post('/course/{course_id}/assessment/{assessment_id}/student/{student_id}', [AssessmentController::class, 'assignScore'])->name('student.score');
 
-Route::get('/course/{course_id}/assessment/{assessment_id}/useful_reviews', [ReviewController::class, 'showUsefulReviews'])->name('review.useful');
-Route::post('/course/{course_id}/assessment/{assessment_id}', [ReviewController::class, 'markAsUseful'])->name('review.mark_useful');
+
 
 Route::get('assessment/{assessment_id}/workshops', [WorkshopController::class, 'index'])->name('workshops.list');
 
@@ -76,6 +78,8 @@ Route::middleware('auth')->group(function () {
 
 // Authentication routes
 require __DIR__.'/auth.php';
+
+Route::post('/review/{review}/rate-feedback', [App\Http\Controllers\ReviewController::class, 'rateFeedback'])->name('review.rate_feedback');
 
 
 

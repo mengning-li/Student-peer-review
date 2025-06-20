@@ -9,11 +9,9 @@ use App\Models\Review;
 use App\Models\User;
 use App\Models\AssessmentScore;
 
-
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-
 
 class AssessmentController extends Controller
 {
@@ -29,62 +27,93 @@ class AssessmentController extends Controller
     public function show($course_id, $assessment_id)
     {
         $course = Course::findOrFail($course_id);
-
         $assessment = Assessment::where('course_id', $course_id)->findOrFail($assessment_id);
+        
+        // Check if user is teacher or student and route accordingly
+        if (auth()->user()->role === 'teacher') {
+            return $this->showTeacherView($course, $assessment);
+        } else {
+            return $this->showStudentView($course, $assessment);
+        }
+    }
+    
+    // Method to display assessment for teachers
+    private function showTeacherView($course, $assessment)
+    {
+        // Get enrolled students with their review counts and scores using Eloquent
+        $enrolledStudents = User::whereHas('enrollments', function($query) use ($course) {
+                $query->where('course_id', $course->id);
+            })
+            ->where('role', 'student')
+            ->with(['assessmentScores' => function($query) use ($assessment) {
+                $query->where('assessment_id', $assessment->id);
+            }])
+            ->withCount([
+                'submittedReviews as submitted_num' => function($query) use ($assessment) {
+                    $query->where('assessment_id', $assessment->id);
+                },
+                'receivedReviews as received_num' => function($query) use ($assessment) {
+                    $query->where('assessment_id', $assessment->id);
+                }
+            ])
+            ->get()
+            ->map(function($student) {
+                // Add the score from assessment_scores relationship
+                $student->score = $student->assessmentScores->first()->score ?? null;
+                return $student;
+            });
 
-
-        $workshops = Workshop::where('assessment_id', $assessment_id)
-                        ->first();
-
-        // Items per page
-        $perPage = 10;
-
-        $currentPage = request()->input('page', 1);
-
-        $offset = ($currentPage - 1) * $perPage;
-
+        return view('course.assessment_detail_teacher', compact('course', 'assessment', 'enrolledStudents'));
+    }
+    
+    // Method to display assessment for students
+    private function showStudentView($course, $assessment)
+    {
+        $workshops = Workshop::where('assessment_id', $assessment->id)->first();
         $currentStudentId = auth()->id();
 
-        $reviewReceived = Review::select('reviews.*', 'reviewer.name as reviewer_name', 'reviewee.name as reviewee_name')
-            ->join('users as reviewer', 'reviews.reviewer_id', '=', 'reviewer.id')
-            ->join('users as reviewee', 'reviews.reviewee_id', '=', 'reviewee.id')
-            ->where('reviews.reviewee_id', '=', $currentStudentId)
-            ->where('reviews.assessment_id', '=', $assessment_id) 
+        // Get reviews received by current student using Eloquent relationships
+        $reviewReceived = Review::with(['reviewer:id,name', 'reviewee:id,name'])
+            ->where('reviewee_id', $currentStudentId)
+            ->where('assessment_id', $assessment->id)
             ->get();
 
-
-        $studentsToReview = User::select('users.*')
-            ->leftJoin('reviews', function ($join) use ($currentStudentId, $assessment_id) {
-                $join->on('users.id', '=', 'reviews.reviewee_id')
-                    ->where('reviews.reviewer_id', '=', $currentStudentId)
-                    ->where('reviews.assessment_id', '=', $assessment_id);
+        // Get students to review using Eloquent relationships
+        $studentsToReview = User::whereHas('enrollments', function($query) use ($course) {
+                $query->where('course_id', $course->id);
             })
-            ->join('enrollments', 'enrollments.user_id', '=', 'users.id')
-            ->where('enrollments.course_id', '=', $course_id)
-            ->where('users.role', '=', 'student')
-            ->whereNull('reviews.reviewee_id')
-            ->where('users.id', '!=', $currentStudentId)
+            ->whereDoesntHave('receivedReviews', function($query) use ($currentStudentId, $assessment) {
+                $query->where('reviewer_id', $currentStudentId)
+                      ->where('assessment_id', $assessment->id);
+            })
+            ->where('role', 'student')
+            ->where('id', '!=', $currentStudentId)
             ->get();
 
-
-        
-        // The students who enrolled the specific course
-        $enrolledStudents = DB::table('users')
-            ->join('enrollments', 'users.id', '=', 'enrollments.user_id') 
-            ->leftJoin('assessment_scores', function($join) use ($assessment_id) {
-                $join->on('users.id', '=', 'assessment_scores.user_id')
-                    ->where('assessment_scores.assessment_id', '=', $assessment_id);
+        // Get enrolled students with their review counts and scores using Eloquent (for reference)
+        $enrolledStudents = User::whereHas('enrollments', function($query) use ($course) {
+                $query->where('course_id', $course->id);
             })
-            ->select('users.id', 'users.name',
-                DB::raw('(SELECT COUNT(*) FROM reviews WHERE reviews.reviewer_id = users.id AND reviews.assessment_id = ' . $assessment_id . ') as submitted_num'),
-                DB::raw('(SELECT COUNT(*) FROM reviews WHERE reviews.reviewee_id = users.id AND reviews.assessment_id = ' . $assessment_id . ') as received_num'),
-                'assessment_scores.score'
-            )
-            ->where('enrollments.course_id', $course_id)
-            ->where('users.role', 'student')
+            ->where('role', 'student')
+            ->with(['assessmentScores' => function($query) use ($assessment) {
+                $query->where('assessment_id', $assessment->id);
+            }])
+            ->withCount([
+                'submittedReviews as submitted_num' => function($query) use ($assessment) {
+                    $query->where('assessment_id', $assessment->id);
+                },
+                'receivedReviews as received_num' => function($query) use ($assessment) {
+                    $query->where('assessment_id', $assessment->id);
+                }
+            ])
             ->paginate(10);
 
-        return view('course.assessment_detail', compact('course', 'assessment', 'studentsToReview', 'reviewReceived', 'enrolledStudents', 'workshops'));
+        $reviewSubmitted = \App\Models\Review::with('reviewee')
+            ->where('reviewer_id', auth()->id())
+            ->where('assessment_id', $assessment->id)
+            ->get();
+
+        return view('course.assessment_detail', compact('course', 'assessment', 'studentsToReview', 'reviewReceived', 'enrolledStudents', 'workshops', 'reviewSubmitted'));
     }
 
     
@@ -114,7 +143,6 @@ class AssessmentController extends Controller
         return redirect()->route('course.detail', $course_id);
     }
 
-
     // Method to get edit assessment form
     public function edit($course_id, $assessment_id)
     {
@@ -126,7 +154,7 @@ class AssessmentController extends Controller
     }
 
     // Method to update assessment
-        public function update(Request $request, $course_id, $assessment_id)
+    public function update(Request $request, $course_id, $assessment_id)
     {
         // Fetch the assessment by its ID
         $assessment = Assessment::findOrFail($assessment_id);
@@ -152,38 +180,29 @@ class AssessmentController extends Controller
     public function showStudent($course_id, $assessment_id, $student_id)
     {
         $course = Course::findOrFail($course_id);
-        // Fetch student details
-        $student = DB::table('users')->where('id', $student_id)->first();
+        
+        // Fetch student details using Eloquent
+        $student = User::findOrFail($student_id);
 
+        // Fetch assessment score using Eloquent
         $assessment_score = AssessmentScore::where('assessment_id', $assessment_id)
             ->where('user_id', $student_id)
             ->first();
 
+        // Fetch the assessment details using Eloquent
+        $assessment = Assessment::findOrFail($assessment_id);
 
-        $assessment_score = !empty($assessment_score) ? $assessment_score[0] : null;
-        // Fetch the assessment details
-        $assessment = DB::table('assessments')->where('id', $assessment_id)->first();
-
-        // Fetch the reviews submitted by the student
-        $reviewSubmitted = User::select('users.*', 'reviews.review_content')
-            ->leftJoin('reviews', function($join) use ($assessment_id) {
-                $join->on('users.id', '=', 'reviews.reviewer_id')
-                    ->where('reviews.assessment_id', '=', $assessment_id);
-            })
-            ->where('reviews.reviewer_id', '=', $student_id)
+        // Fetch the reviews submitted by the student using Eloquent relationships
+        $reviewSubmitted = Review::with('reviewee:id,name')
+            ->where('reviewer_id', $student_id)
+            ->where('assessment_id', $assessment_id)
             ->get();
 
-        
-
-            $reviewReceived = User::select('users.*', 'users.name as reviewer_name', 'reviews.review_content')
-            ->leftJoin('reviews', function($join) use ($assessment_id) {
-                $join->on('users.id', '=', 'reviews.reviewer_id')
-                     ->where('reviews.assessment_id', '=', $assessment_id);
-            })
-            ->where('reviews.reviewee_id', '=', $student_id)
+        // Fetch the reviews received by the student using Eloquent relationships
+        $reviewReceived = Review::with('reviewer:id,name')
+            ->where('reviewee_id', $student_id)
+            ->where('assessment_id', $assessment_id)
             ->get();
-        
-
 
         // Return the view with the fetched data
         return view('course.student_detail', compact('student', 'course', 'assessment', 'reviewSubmitted', 'reviewReceived', 'assessment_score'));
@@ -192,16 +211,16 @@ class AssessmentController extends Controller
     // Method to assign score to a student
     public function assignScore(Request $request, $course_id, $assessment_id, $student_id)
     {   
-        // Fetch the max score from the assessment table
-        $assessment = DB::table('assessments')->where('id', $assessment_id)->first();
+        // Fetch the assessment using Eloquent
+        $assessment = Assessment::findOrFail($assessment_id);
 
         // Validate the score input to ensure it's not greater than the max score from the assessment
         $validated = $request->validate([
             'score' => 'required|numeric|min:0|max:' . $assessment->max_score
         ]);
 
-        // Insert or update the score for the student in this assessment
-        DB::table('assessment_scores')->updateOrInsert(
+        // Insert or update the score for the student in this assessment using Eloquent
+        AssessmentScore::updateOrCreate(
             ['assessment_id' => $assessment_id, 'user_id' => $student_id],
             ['score' => $validated['score']]
         );
@@ -209,9 +228,4 @@ class AssessmentController extends Controller
         // Redirect back to the student's detail page with a success message
         return redirect()->route('student.detail', [$course_id, $assessment_id, $student_id]);
     }
-
-
-
-
-
 }

@@ -17,9 +17,9 @@ class ReviewFactory extends Factory
     public function definition()
     {
         return [
-            'reviewer_id' => User::factory(), // Generate a user as reviewer
-            'reviewee_id' => User::factory(), // Generate a user as reviewee
-            'assessment_id' => Assessment::factory(), // Generate an assessment
+            'assessment_id' => Assessment::factory(),
+            'reviewer_id' => User::factory(),
+            'reviewee_id' => User::factory(),
             'review_content' => $this->faker->paragraph(),
             'created_at' => now(),
             'updated_at' => now(),

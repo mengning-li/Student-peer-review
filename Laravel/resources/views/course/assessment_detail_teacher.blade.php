@@ -1,104 +1,150 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Course: ') . $course->name }}
-            <br>
-            {{ __('Assessment: ') . $assessment->title }}
+        <h2 class="font-semibold text-2xl text-indigo-800 leading-tight font-sans tracking-wide">
+            {{ __('Course: ') . $course->name }}<br>
+            {{ __('Assessment: ') . $assessment->title }} (Teacher View)
         </h2>
     </x-slot>
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                @if (auth()->check() && auth()->user()->role === 'teacher')
-                <!-- assessment details for students -->
-                <div class="p-6 bg-white border-b border-gray-200">
-                    <div class="my-3 p-3 bg-body rounded shadow-sm">
-                        <p class="pb-3"><strong>Title:</strong> {{ $assessment->title }}</p>
-                        <p class="pb-3"><strong>Instruction:</strong> {{ $assessment->instruction }}</p>
-                        <p class="pb-3"><strong>Due Date:</strong> {{ $assessment->due_date }}</p>
-                        <p class="pb-3"><strong>Max Score:</strong> {{ $assessment->max_score }}</p>
-                        <p class="pb-3"><strong>Required Reviews:</strong> {{ $assessment->required_reviews }}</p>
+    <div class="py-12 bg-gray-50 min-h-screen">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+            @if (auth()->check() && auth()->user()->role === 'teacher')
+                <!-- Assessment Details Card -->
+                <div class="bg-white rounded-2xl shadow p-6 border border-gray-200 mb-6" style="border-radius: 1rem;">
+                    <h3 class="text-xl font-bold text-indigo-700 mb-4">Assessment Details</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-gray-700">
+                        <div><span class="font-semibold">Title:</span> {{ $assessment->title }}</div>
+                        <div><span class="font-semibold">Instruction:</span> {{ $assessment->instruction }}</div>
+                        <div><span class="font-semibold">Due Date:</span> {{ $assessment->due_date }}</div>
+                        <div><span class="font-semibold">Max Score:</span> {{ $assessment->max_score }}</div>
+                        <div><span class="font-semibold">Required Reviews:</span> {{ $assessment->required_reviews }}</div>
+                        <div><span class="font-semibold">Type:</span> 
+                            <span class="capitalize">{{ str_replace('-', ' ', $assessment->type) }}</span>
+                        </div>
                     </div>
                 </div>
 
-
-                <div class="p-6 bg-white border-b border-gray-200">
-                    <div class="my-3 p-3 bg-body rounded shadow-sm">
-                        <p class="pb-3 fs-4"><strong>Worshop List:</strong></p>
-                        @if ($workshops)
-                            <div class="list-group">
-                                <table class="table table-bordered table-striped table-hover">
-                                    <thead class="thead-dark">
-                                        <tr>
-                                            <th scope="col">Workshop title</th>
-                                            <th scope="col">workshop Status</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach ($workshops as $workshop)
-                                            <tr>
-                                                <td>
-                                                 <a href="{{ route('workshops.list', ['assessment_id' => $assessment->id] }}">
-                                        <p>{{ $workshop->title }}</p> 
-                                    </a>
-                                </td>
-                                <td>
-                                    @if ($workshop->active_status)
-                                        <!-- If the workshop is active, show the "Join" button -->
-                                        <form action="{{ route('workshop.join', [$workshop->id, $assessment->id, $user->id]) }}" method="POST" class="ms-3">
-                                            @csrf
-                                            <button type="submit" class="btn btn-outline-secondary btn-sm">Join</button>
-                                        </form>
-                                    @else
-                                        <!-- If the workshop is inactive, disable the button and show a message -->
-                                        <button type="button" class="btn btn-outline-secondary btn-sm" disabled>Inactive</button>
-                                    @endif
-                                </td>
-                                <td>{{ $student->submitted_num ?? 'N/A' }}</td>                
-                                <td>{{ $student->score ?? 'N/A' }}</td>
-                            </tr>
-                        @endforeach
-                    </tbody>    
-                </table>
-            </div>
-        @else
-            <p class="text-muted">No workshops found.</p>
-        @endif
-    </div>
-
-                <div class="p-6 text-gray-900">
-                    <table class="table table-bordered table-striped table-hover">
-                        <thead class="thead-dark">
-                            <tr>
-                                <th scope="col">Student Name</th>
-                                <th scope="col">Review received</th>
-                                <th scope="col">Review submitted</th>
-                                <th scope="col">Score</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach ($enrolledStudents as $student)
-                                <tr>
-                                    <td>
-                                    <a href="{{ route('student.detail', ['course_id' => $course->id, 'assessment_id' => $assessment->id, 'student_id' => $student->id]) }}">
-                                        {{ $student->name }}
-                                    </a>
-                                    </td>
-                                    <td>{{ $student->received_num }}</td>
-                                    <td>{{ $student->submitted_num }}</td>                
-                                    <td>{{ $student->score }}</td>
-                                </tr>
-                            @endforeach
-                        </tbody>    
-                    </table>
+                <!-- Students Overview Card -->
+                <div class="bg-white rounded-2xl shadow p-6 border border-gray-200 mb-6" style="border-radius: 1rem;">
+                    <div class="p-6 border-b border-gray-200">
+                        <h3 class="text-xl font-bold text-indigo-700">Students Overview</h3>
+                        <p class="text-gray-600 mt-2">Click on a student's name to view detailed reviews and assign scores</p>
+                    </div>
                     
-                    <!-- Pagination Links -->
-                    <div class="pagination">
-                        {{ $enrolledStudents->links() }}   
-                    </div>
-                @endif
+                    @if ($enrolledStudents->isNotEmpty())
+                        <div class="overflow-x-auto">
+                            <table class="w-full">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700 border-b">Student Name</th>
+                                        <th class="px-6 py-4 text-center text-sm font-semibold text-gray-700 border-b">Reviews Received</th>
+                                        <th class="px-6 py-4 text-center text-sm font-semibold text-gray-700 border-b">Reviews Submitted</th>
+                                        <th class="px-6 py-4 text-center text-sm font-semibold text-gray-700 border-b">Current Score</th>
+                                        <th class="px-6 py-4 text-center text-sm font-semibold text-gray-700 border-b">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-200">
+                                    @foreach ($enrolledStudents as $student)
+                                        <tr class="hover:bg-gray-50 transition-colors">
+                                            <td class="px-6 py-4">
+                                                <div class="flex items-center">
+                                                    <div class="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center mr-3">                              
+                                                            {{ $student->name }}         
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="px-6 py-4 text-center">
+                                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium 
+                                                    @if($student->received_num >= $assessment->required_reviews) 
+                                                        bg-green-100 text-green-800 
+                                                    @elseif($student->received_num > 0) 
+                                                        bg-yellow-100 text-yellow-800 
+                                                    @else 
+                                                        bg-red-100 text-red-800 
+                                                    @endif">
+                                                    {{ $student->received_num }}
+                                                </span>
+                                            </td>
+                                            <td class="px-6 py-4 text-center">
+                                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium 
+                                                    @if($student->submitted_num >= $assessment->required_reviews) 
+                                                        bg-green-100 text-green-800 
+                                                    @elseif($student->submitted_num > 0) 
+                                                        bg-yellow-100 text-yellow-800 
+                                                    @else 
+                                                        bg-red-100 text-red-800 
+                                                    @endif">
+                                                    {{ $student->submitted_num }}
+                                                </span>
+                                            </td>
+                                            <td class="px-6 py-4 text-center">
+                                                @if($student->score !== null)
+                                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                                                        {{ $student->score }}/{{ $assessment->max_score }}
+                                                    </span>
+                                                @else
+                                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-600">
+                                                        Not graded
+                                                    </span>
+                                                @endif
+                                            </td>
+                                            <td class="px-6 py-4 text-center">
+                                                <a href="{{ route('student.detail', ['course_id' => $course->id, 'assessment_id' => $assessment->id, 'student_id' => $student->id]) }}" 
+                                                   class="inline-flex items-center px-4 py-2 border border-indigo-600 rounded-lg text-sm font-medium text-indigo-600 bg-white hover:bg-indigo-50 transition-colors">
+                                                    View Details
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <!-- Summary Statistics -->
+                        <div class="p-6 bg-gray-50 border-t border-gray-200">
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                                <div>
+                                    <div class="text-2xl font-bold text-indigo-600">{{ $enrolledStudents->count() }}</div>
+                                    <div class="text-sm text-gray-600">Total Students</div>
+                                </div>
+                                <div>
+                                    <div class="text-2xl font-bold text-green-600">
+                                        {{ $enrolledStudents->where('score', '!=', null)->count() }}
+                                    </div>
+                                    <div class="text-sm text-gray-600">Graded</div>
+                                </div>
+                                <div>
+                                    <div class="text-2xl font-bold text-yellow-600">
+                                        {{ $enrolledStudents->where('submitted_num', '>=', $assessment->required_reviews)->count() }}
+                                    </div>
+                                    <div class="text-sm text-gray-600">Completed Reviews</div>
+                                </div>
+                                <div>
+                                    <div class="text-2xl font-bold text-purple-600">
+                                        @if($enrolledStudents->where('score', '!=', null)->count() > 0)
+                                            {{ number_format($enrolledStudents->where('score', '!=', null)->avg('score'), 1) }}
+                                        @else
+                                            N/A
+                                        @endif
+                                    </div>
+                                    <div class="text-sm text-gray-600">Average Score</div>
+                                </div>
+                            </div>
+                        </div>
+                    @else
+                        <div class="p-8 text-center">
+                            <div class="text-gray-400 text-lg">No students enrolled in this course</div>
+                        </div>
+                    @endif
                 </div>
+            @else
+                <div class="bg-red-50 border border-red-200 rounded-2xl p-6">
+                    <div class="text-red-800 text-center">
+                        <h3 class="font-semibold text-lg mb-2">Access Denied</h3>
+                        <p>You must be a teacher to access this page.</p>
+                    </div>
+                </div>
+            @endif
         </div>
     </div>
 </x-app-layout>

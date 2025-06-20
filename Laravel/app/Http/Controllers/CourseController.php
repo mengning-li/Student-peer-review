@@ -32,8 +32,13 @@ class CourseController extends Controller
     {
         // Find the course by id
         $course = Course::find($id);
-        $assessments = $course->assessments;
         $teachers = $course->users()->where('role', 'teacher')->get();
+        
+        // Get assessments with scores for the current user
+        $currentUserId = auth()->id();
+        $assessments = $course->assessments()->with(['assessmentScores' => function($query) use ($currentUserId) {
+            $query->where('user_id', $currentUserId);
+        }])->get();
 
         // Return the course details view with both course and teachers
         return view('course.detail', compact('course', 'teachers', 'assessments'));
@@ -120,6 +125,20 @@ class CourseController extends Controller
         $fileContent = file_get_contents(Storage::disk('public')->path($filePath));
         $courseData = json_decode($fileContent, true);
 
+        // Check if JSON was properly decoded
+        if ($courseData === null) {
+            $jsonError = json_last_error_msg();
+            return redirect()->back()->with('error', 'Invalid JSON file. Error: ' . $jsonError . '. Please check the file format.')->withInput();
+        }
+
+        // Check if all required keys exist
+        $requiredKeys = ['CourseCode', 'CourseName', 'Teachers', 'Assessments', 'Students'];
+        foreach ($requiredKeys as $key) {
+            if (!isset($courseData[$key])) {
+                return redirect()->back()->with('error', "Missing required field: $key in JSON file.")->withInput();
+            }
+        }
+
         // Extract data from JSON
         $courseCode = $courseData['CourseCode'];
         $courseName = $courseData['CourseName'];
@@ -127,12 +146,36 @@ class CourseController extends Controller
         $assessments = $courseData['Assessments'];
         $students = $courseData['Students'];
 
+        // VALIDATION PHASE - Check everything BEFORE creating anything
+        
         // Check if a course with the same code already exists
         $existingCourse = Course::where('code', $courseCode)->first();
         if ($existingCourse) {
             return redirect()->back()->with('error', 'A course with this code already exists.')->withInput();
         }
 
+        // Validate all assessments have required fields
+        foreach ($assessments as $index => $assessmentData) {
+            $requiredAssessmentKeys = ['Title', 'Instruction', 'MaxScore', 'DueDate', 'Type', 'RequiredReviews'];
+            foreach ($requiredAssessmentKeys as $key) {
+                if (!isset($assessmentData[$key])) {
+                    return redirect()->back()->with('error', "Missing required field: $key in assessment #" . ($index + 1) . ".")->withInput();
+                }
+            }
+        }
+
+        // Validate all teachers exist in the database
+        $teacherUsers = [];
+        foreach ($teachers as $sNumber) {
+            $teacher = User::where('sNumber', $sNumber)->first();
+            if (!$teacher) {
+                return redirect()->back()->with('error', "Teacher with sNumber $sNumber not found.")->withInput();
+            }
+            $teacherUsers[] = $teacher; // Store for later use
+        }
+
+        // CREATION PHASE - All validations passed, now create everything
+        
         // Create the course
         $course = new Course([
             'code' => $courseCode,
@@ -152,17 +195,9 @@ class CourseController extends Controller
             ]);
         }
 
-        // Attach existing teachers to the course
-        foreach ($teachers as $sNumber) {
-            $teacher = User::where('sNumber', $sNumber)->first(); // Find teacher by unique sNumber
-
-            if ($teacher) {
-                // Teacher found, attach to course without duplication
-                $course->users()->syncWithoutDetaching($teacher->id);
-            } else {
-                // Teacher not found, return error message
-                return redirect()->back()->with('error', "Teacher with sNumber $sNumber not found.")->withInput();
-            }
+        // Attach validated teachers to the course
+        foreach ($teacherUsers as $teacher) {
+            $course->users()->syncWithoutDetaching($teacher->id);
         }
 
         // Handle students, create if they don't exist
@@ -182,5 +217,17 @@ class CourseController extends Controller
 
         // Redirect after processing all students
         return redirect()->route('home')->with('success', 'Course and its details have been uploaded successfully.');
+    }
+
+    // Method to download JSON template
+    public function downloadTemplate()
+    {
+        $templatePath = public_path('templates/course_template.json');
+        
+        if (file_exists($templatePath)) {
+            return response()->download($templatePath, 'course_template.json');
+        }
+        
+        return redirect()->back()->with('error', 'Template file not found.');
     }
 }

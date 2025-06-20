@@ -18,6 +18,9 @@ return new class extends Migration
             $table->unsignedBigInteger('reviewee_id');  // The student being reviewed
             $table->text('review_content');
             $table->boolean('is_useful')->default(false);
+            $table->integer('rating')->nullable(); // 1-5 star rating for the review
+            $table->text('feedback')->nullable(); // feedback for the review
+            $table->integer('score')->nullable(); // score given by reviewer to reviewee
             $table->timestamps();
         
             // Foreign keys

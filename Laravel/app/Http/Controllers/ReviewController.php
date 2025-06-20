@@ -25,7 +25,8 @@ class ReviewController extends Controller
                         $fail('The review content must be at least 5 words.');
                     }
                 }
-            ]
+            ],
+            'score' => 'nullable|integer|min:0|max:100',
         ]);
         
 
@@ -35,41 +36,30 @@ class ReviewController extends Controller
             'reviewer_id' => auth()->id(),
             'reviewee_id' => $request->reviewee_id,
             'review_content' => $request->review_content,
+            'score' => $request->score,
         ]);
 
         return redirect()->back();
     }
 
-    //Function to mark useful reviews
-    public function markAsUseful($review_id)
+    // New: Store rating and feedback for a received review
+    public function rateFeedback(Request $request, $review_id)
     {
+        $request->validate([
+            'rating' => 'required|integer|min:1|max:5',
+            'feedback' => 'nullable|string',
+        ]);
+
         $review = Review::findOrFail($review_id);
-        
-        if (auth()->id() == $review->reviewee_id) {
-            Review::where('reviewee_id', auth()->id())
-                ->where('assessment_id', $review->assessment_id)
-                ->update(['is_useful' => false]);
-
-            $review->is_useful = true;
-            $review->save();
+        // Only the reviewee can rate/feedback
+        if (auth()->id() !== $review->reviewee_id) {
+            abort(403);
         }
-        
+        $review->rating = $request->rating;
+        $review->feedback = $request->feedback;
+        $review->save();
+
         return redirect()->back();
-    }
-
-    // Function to display the useful review
-    public function showUsefulReviews($course_id, $assessment_id)
-    {
-        $course = Course::findOrFail($course_id);
-        $assessment = Assessment::findOrFail($assessment_id);
-
-        // Use Eloquent to retrieve useful reviews and create anonymous names for reviewers
-        $usefulReviews = Review::where('assessment_id', $assessment_id)
-        ->where('is_useful', true)
-        ->get();
-
-    // Return the view with useful reviews
-    return view('course.useful_review', compact('usefulReviews', 'course', 'assessment'));
     }
 
 }

@@ -56,5 +56,19 @@ class User extends Authenticatable
         return $this->belongsToMany(Course::class, 'enrollments', 'user_id', 'course_id');
     }
 
+    // Add these relationships for Eloquent queries in AssessmentController
+    public function receivedReviews()
+    {
+        return $this->hasMany(\App\Models\Review::class, 'reviewee_id');
+    }
 
+    public function submittedReviews()
+    {
+        return $this->hasMany(\App\Models\Review::class, 'reviewer_id');
+    }
+
+    public function assessmentScores()
+    {
+        return $this->hasMany(\App\Models\AssessmentScore::class, 'user_id');
+    }
 }

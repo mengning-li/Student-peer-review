@@ -33,4 +33,9 @@ class Assessment extends Model
     {
         return $this->hasMany(Workshop::class);
     }
+
+    public function assessmentScores()
+    {
+        return $this->hasMany(AssessmentScore::class);
+    }
 }

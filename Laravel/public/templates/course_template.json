@@ -1,0 +1,33 @@
+{
+    "CourseCode": "ICT101",
+    "CourseName": "Introduction to Information Technology",
+    "Teachers": [
+        "T001",
+        "T002"
+    ],
+    "Students": [
+        "S001",
+        "S002",
+        "S003",
+        "S004",
+        "S005"
+    ],
+    "Assessments": [
+        {
+            "Title": "Week 1 Review",
+            "Instruction": "Review your peer's work on basic programming concepts. Focus on code structure, logic, and documentation quality.",
+            "MaxScore": 100,
+            "DueDate": "2024-12-15 23:59:00",
+            "Type": "student-select",
+            "RequiredReviews": 3
+        },
+        {
+            "Title": "Mid-term Project",
+            "Instruction": "Evaluate your assigned peer's project submission. Consider functionality, code quality, and presentation.",
+            "MaxScore": 100,
+            "DueDate": "2024-12-30 23:59:00",
+            "Type": "teacher-assign",
+            "RequiredReviews": 2
+        }
+    ]
+} 

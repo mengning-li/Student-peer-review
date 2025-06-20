@@ -29,12 +29,12 @@
                         @else
                         @foreach ($courses as $course)
                             <tr>
-                                <td><a href="{{ url("course_detail/{$course->id}") }}">{{ $course->code }}</a></td>
-                                <td><a href="{{ url("course_detail/{$course->id}") }}">{{ $course->name }}</a></td>
+                                <td><a href="{{ url("course_detail/{$course->id}") }}" class="text-indigo-600 hover:text-indigo-800 font-medium text-decoration-none">{{ $course->code }}</a></td>
+                                <td><a href="{{ url("course_detail/{$course->id}") }}" class="text-indigo-600 hover:text-indigo-800 font-medium text-decoration-none">{{ $course->name }}</a></td>
                                 @if (auth()->user()->role === 'teacher')
                                     <td>
                                         <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150">
-                                            <a href="{{route('course.add_student', $course->id) }}">ADD STUDENT</a>                     
+                                            <a href="{{route('course.add_student', $course->id) }}" class="text-gray-600 hover:text-gray-800 text-decoration-none">ADD STUDENT</a>                     
                                         </button>
                                     </td>
                                 @endif
@@ -60,6 +60,7 @@
                         <input class="form-control" type="file" id="formFile" name="course_file" style="border: 2px solid #ccc; border-radius: 5px; padding: 10px;">
                     </div>
                     <button type="submit" class="btn btn-dark">Submit</button>
+                    <a href="{{ route('course.template.download') }}" class="btn btn-outline-primary ms-2 text-decoration-none"> Download Template</a>
                 </form>              
                 </div>
             </div>
