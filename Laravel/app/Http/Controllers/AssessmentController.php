@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Assessment;
 use App\Models\Course;
-use App\Models\Workshop;
 use App\Models\Review;
 use App\Models\User;
 use App\Models\AssessmentScore;
@@ -69,7 +68,6 @@ class AssessmentController extends Controller
     // Method to display assessment for students
     private function showStudentView($course, $assessment)
     {
-        $workshops = Workshop::where('assessment_id', $assessment->id)->first();
         $currentStudentId = auth()->id();
 
         // Get reviews received by current student using Eloquent relationships
@@ -113,7 +111,7 @@ class AssessmentController extends Controller
             ->where('assessment_id', $assessment->id)
             ->get();
 
-        return view('course.assessment_detail', compact('course', 'assessment', 'studentsToReview', 'reviewReceived', 'enrolledStudents', 'workshops', 'reviewSubmitted'));
+        return view('course.assessment_detail', compact('course', 'assessment', 'studentsToReview', 'reviewReceived', 'enrolledStudents', 'reviewSubmitted'));
     }
 
     

@@ -4,7 +4,6 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\WorkshopController;
 use App\Http\Controllers\AssessmentController;
 use Illuminate\Support\Facades\Auth;
 
@@ -60,21 +59,8 @@ Route::post('/course/{course_id}/assessment/{assessment_id}/student/{student_id}
 
 
 
-Route::get('assessment/{assessment_id}/workshops', [WorkshopController::class, 'index'])->name('workshops.list');
-
-// Route::get('/assessment/{assessment_id}/workshops', [WorkshopController::class, 'showWorkshops'])->name('workshops.list');
-Route::post('/workshop/{workshop_id}/join/{assessment_id}', [WorkshopController::class, 'joinWorkshop'])->name('workshop.join');
-
-
 // Logout route
 Route::post('/logout', [Auth\LoginController::class, 'logout'])->name('logout');
-
-// Workshop Routes
-Route::middleware('auth')->group(function () {
-    Route::get('/course/{course_id}/assessment/{assessment_id}/workshop/create', [AssessmentController::class, 'createWorkshop'])->name('workshop.create');
-    Route::post('/course/{course_id}/assessment/{assessment_id}/workshop/{workshop_id}/assign-groups', [AssessmentController::class, 'assignGroups'])->name('workshop.assign_groups');
-    Route::get('/course/{course_id}/assessment/{assessment_id}/workshop/{workshop_id}/join', [AssessmentController::class, 'joinWorkshop'])->name('workshop.join');
-});
 
 // Authentication routes
 require __DIR__.'/auth.php';

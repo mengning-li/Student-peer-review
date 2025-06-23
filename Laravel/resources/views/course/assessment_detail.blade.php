@@ -156,7 +156,7 @@
                             </div>
                         </form>
                     @else
-                        <p class="text-gray-500 italic">Join your workshop</p>
+                                                    <p class="text-gray-500 italic">Start peer reviews</p>
                     @endif
                 </div>
             @endif
