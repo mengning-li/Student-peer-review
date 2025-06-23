@@ -1,0 +1,67 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Documentation
+README.md
+*.md
+
+# Docker files
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Node modules (will be installed during build)
+Laravel/node_modules
+Laravel/npm-debug.log
+
+# Vendor directory (will be installed during build)
+Laravel/vendor
+
+# Environment files
+Laravel/.env
+Laravel/.env.*
+
+# Laravel specific
+Laravel/storage/logs/*
+Laravel/storage/framework/cache/*
+Laravel/storage/framework/sessions/*
+Laravel/storage/framework/views/*
+Laravel/storage/app/public/*
+Laravel/bootstrap/cache/*
+
+# IDE and editor files
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+*.log
+
+# Test files
+Laravel/tests/
+Laravel/phpunit.xml
+Laravel/.phpunit.result.cache
+
+# Development tools
+Laravel/webpack.mix.js
+Laravel/package-lock.json
+Laravel/yarn.lock
+
+# Database files (will be created during runtime)
+Laravel/database/*.sqlite
+*.db 
