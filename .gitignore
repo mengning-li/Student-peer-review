@@ -1,0 +1,91 @@
+# Operating System Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+*~
+
+# IDE Files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Laravel Specific
+Laravel/.env
+Laravel/.env.backup
+Laravel/.env.production
+Laravel/vendor/
+Laravel/node_modules/
+Laravel/npm-debug.log*
+Laravel/yarn-debug.log*
+Laravel/yarn-error.log*
+Laravel/storage/logs/*.log
+Laravel/storage/framework/cache/data/*
+Laravel/storage/framework/sessions/*
+Laravel/storage/framework/views/*
+Laravel/storage/framework/testing/*
+Laravel/bootstrap/cache/*.php
+Laravel/storage/app/public/*
+Laravel/public/storage
+
+# Build Artifacts
+Laravel/public/hot
+Laravel/public/storage
+Laravel/public/build/assets/*.map
+
+# Database
+Laravel/database/database.sqlite
+Laravel/database/*.sqlite*
+
+# Docker
+.env.docker
+docker-compose.override.yml
+
+# Logs
+*.log
+logs/
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Package manager
+composer.lock.bak
+package-lock.json.bak
+
+# Backup files
+*.bak
+*.backup
+*.tmp
+
+# Testing
+Laravel/tests/Feature/tmp/
+Laravel/tests/Unit/tmp/
+Laravel/storage/testing/
+
+# Cache
+Laravel/storage/framework/cache/data/*
+Laravel/storage/framework/sessions/*
+Laravel/storage/framework/views/*
+Laravel/bootstrap/cache/*
+
+# Documentation build
+docs/_build/
+
+# SSL Certificates
+*.pem
+*.key
+*.crt
+*.csr
+
+# Config files with secrets
+config/secrets.php
+.env.local
+.env.*.local 
