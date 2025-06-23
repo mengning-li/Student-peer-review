@@ -42,8 +42,67 @@ A comprehensive Laravel-based web application designed for educational instituti
 
 
 
-## 🚀 Installation
+## 🚀 Installation & Deployment
 
+### 🐳 Docker Deployment (Recommended)
+
+This project is fully configured for Docker deployment. Simply clone and run:
+
+```bash
+# Clone the repository
+git clone <your-repo-url>
+cd Student-peer-review
+
+# Build and start the containers
+docker-compose up -d
+
+# Access the application
+open http://localhost:8000
+```
+
+The Docker setup includes:
+- **PHP 8.2 with Apache** (Application server)
+- **MySQL 8.0** (Database)
+- **Redis** (Caching)
+- **Nginx** (Reverse proxy)
+- **phpMyAdmin** (Database management)
+
+### 🔧 Manual Installation
+
+If you prefer manual installation:
+
+```bash
+# Clone repository
+git clone <your-repo-url>
+cd Student-peer-review/Laravel
+
+# Install dependencies
+composer install
+npm install
+
+# Environment setup
+cp .env.example .env
+php artisan key:generate
+
+# Database setup
+php artisan migrate
+php artisan db:seed
+
+# Build assets
+npm run build
+
+# Start development server
+php artisan serve
+```
+
+### 🌐 Production Deployment
+
+For production deployment on cloud platforms:
+
+1. **Environment Variables**: Update `.env` with production settings
+2. **Database**: Configure production database connection
+3. **Assets**: Run `npm run build` for optimized assets
+4. **Docker**: Use `docker-compose.prod.yml` for production configuration
 
 ## 📁 Project Structure
 
@@ -72,6 +131,3 @@ Laravel/
 
 This project is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
 
-
-
-**Built with ❤️ using Laravel, Tailwind CSS, and modern web technologies.**
