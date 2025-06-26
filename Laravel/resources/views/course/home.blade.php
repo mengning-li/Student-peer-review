@@ -53,7 +53,7 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
-                <form action="{{ route('course.upload', $course->id) }}" method="POST" enctype="multipart/form-data">
+                <form action="{{ route('course.upload') }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     <div class="mb-3">
                         <strong><label for="formFile" class="form-label">Create a new course</label></strong>

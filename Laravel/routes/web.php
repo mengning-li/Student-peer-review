@@ -20,52 +20,36 @@ Route::middleware(['auth'])->group(function () {
     
 });
 
-// Route to show the form for creating a new assessment
-Route::get('/course/{course_id}/add_assessment', [AssessmentController::class, 'create'])->name('course.add_assessment');
+// Protected routes for authenticated users
+Route::middleware(['auth'])->group(function () {
+    // Assessment routes
+    Route::get('/course/{course_id}/add_assessment', [AssessmentController::class, 'create'])->name('course.add_assessment');
+    Route::post('/course/{id}/assessments', [AssessmentController::class, 'store'])->name('assessments.store');
+    Route::get('/course/{course}/assessment/{assessment}/edit', [AssessmentController::class, 'edit'])->name('assessment.edit');
+    Route::put('/course/{course_id}/assessments/{assessment_id}', [AssessmentController::class, 'update'])->name('assessment.update');
+    Route::get('/course/{course_id}/assessment/{assessment_id}', [AssessmentController::class, 'show'])->name('assessment.detail');
+    
+    // Student management routes
+    Route::get('/course/{course_id}/add_student', [CourseController::class, 'showAddStudentForm'])->name('course.add_student');
+    Route::post('/course/{course_id}/enroll', [CourseController::class, 'enrollStudent'])->name('course.enroll');
+    
+    // Course management routes
+    Route::post('/course/create', [CourseController::class, 'uploadCourseFile'])->name('course.upload');
+    Route::get('/course/template/download', [CourseController::class, 'downloadTemplate'])->name('course.template.download');
+    
+    // Review routes
+    Route::post('/course/{course_id}/assessment/{assessment_id}/review', [ReviewController::class, 'store'])->name('review.store');
+    Route::post('/review/{review}/rate-feedback', [ReviewController::class, 'rateFeedback'])->name('review.rate_feedback');
+    
+    // Student detail and scoring routes
+    Route::get('/course/{course_id}/assessment/{assessment_id}/student/{student_id}', [AssessmentController::class, 'showStudent'])->name('student.detail');
+    Route::post('/course/{course_id}/assessment/{assessment_id}/student/{student_id}', [AssessmentController::class, 'assignScore'])->name('student.score');
+});
 
 
-// Show form to enroll a student
-Route::get('/course/{course_id}/add_student', [CourseController::class, 'showAddStudentForm'])->name('course.add_student');
-
-// Handle the enrollment of a student
-Route::post('/course/{course_id}/enroll', [CourseController::class, 'enrollStudent'])->name('course.enroll');
-Route::post('/course/create', [CourseController::class, 'uploadCourseFile'])->name('course.upload');
-
-// Download JSON template
-Route::get('/course/template/download', [CourseController::class, 'downloadTemplate'])->name('course.template.download');
-
-// Route to store the new assessment
-Route::post('/course/{id}/assessments', [AssessmentController::class, 'store'])->name('assessments.store');
-// Route to display the edit form for an assessment
-Route::get('/course/{course}/assessment/{assessment}/edit', [AssessmentController::class, 'edit'])->name('assessment.edit');
-// Route to handle the update request
-Route::put('/course/{course_id}/assessments/{assessment_id}', [AssessmentController::class, 'update'])->name('assessment.update');
-
-
-// Route to submit a peer review on the same assessment detail page
-Route::post('/course/{course_id}/assessment/{assessment_id}/review', [ReviewController::class, 'store'])->name('review.store');
-
-
-Route::get('/course/{course_id}/assessment/{assessment_id}', [ReviewController::class, 'show']);
-// Route to display the assessment details (using AssessmentController)
-
-Route::get('/course/{course_id}/assessment/{assessment_id}', [AssessmentController::class, 'show'])->name('assessment.detail');
-
-    // Route for viewing student details
-Route::get('/course/{course_id}/assessment/{assessment_id}/student/{student_id}', [AssessmentController::class, 'showStudent'])->name('student.detail');
-
-    // Route for submitting score
-Route::post('/course/{course_id}/assessment/{assessment_id}/student/{student_id}', [AssessmentController::class, 'assignScore'])->name('student.score');
-
-
-
-// Logout route
-Route::post('/logout', [Auth\LoginController::class, 'logout'])->name('logout');
 
 // Authentication routes
 require __DIR__.'/auth.php';
-
-Route::post('/review/{review}/rate-feedback', [App\Http\Controllers\ReviewController::class, 'rateFeedback'])->name('review.rate_feedback');
 
 
 

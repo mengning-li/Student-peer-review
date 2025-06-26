@@ -29,10 +29,7 @@ class Assessment extends Model
         return $this->belongsTo(Course::class);
     }
 
-    public function workshops()
-    {
-        return $this->hasMany(Workshop::class);
-    }
+    // Removed workshop functionality - teacher-assign mode not implemented
 
     public function assessmentScores()
     {

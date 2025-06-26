@@ -2,6 +2,33 @@
 
 A comprehensive Laravel-based web application designed for educational institutions to facilitate peer review processes between students. This system enables teachers to create courses, manage assessments, and students to submit and review each other's work in a structured, organized manner.
 
+## 📸 Application Screenshots
+
+### Teacher Dashboard
+*Screenshot of the main teacher dashboard showing course overview and statistics*
+![Teacher Dashboard](screenshots/teacher-dashboard.png)
+
+### Student Dashboard  
+*Screenshot of the student view showing enrolled courses and pending reviews*
+![Student Dashboard](screenshots/student-dashboard.png)
+
+### Assessment Creation
+*Screenshot of the assessment creation form for teachers*
+![Assessment Creation](screenshots/assessment-creation.png)
+
+### Peer Review Interface
+*Screenshot of the peer review submission interface*
+![Peer Review Interface](screenshots/peer-review-interface.png)
+
+### Review Ratings & Feedback
+*Screenshots showing the review rating system and feedback interface*
+
+![Review Ratings - Before Rating](screenshots/review-ratings1.png)
+*Student rating a received review*
+
+![Review Ratings - After Rating](screenshots/review-ratings2.png)
+*Review with completed rating and feedback*
+
 ## ✨ Features
 
 ### 👨‍🏫 For Teachers
@@ -41,7 +68,6 @@ A comprehensive Laravel-based web application designed for educational instituti
 - **File Processing**: JSON template system for bulk operations
 
 
-
 ## 🚀 Installation & Deployment
 
 ### 🐳 Docker Deployment (Recommended)
@@ -50,7 +76,7 @@ This project is fully configured for Docker deployment. Simply clone and run:
 
 ```bash
 # Clone the repository
-git clone <your-repo-url>
+git clone https://github.com/mengning-li/Student-peer-review.git
 cd Student-peer-review
 
 # Build and start the containers
@@ -62,47 +88,79 @@ open http://localhost:8000
 
 The Docker setup includes:
 - **PHP 8.2 with Apache** (Application server)
-- **MySQL 8.0** (Database)
-- **Redis** (Caching)
-- **Nginx** (Reverse proxy)
-- **phpMyAdmin** (Database management)
+- **Redis** (Caching and sessions)
+- **SQLite** (Lightweight database)
+- **Nginx** (Optional reverse proxy - disabled by default)
 
-### 🔧 Manual Installation
+## 🧪 Test Data & Demo Accounts
 
-If you prefer manual installation:
+### 🎲 **Generating Sample Data**
+
+To populate your database with test data for demonstration and development:
 
 ```bash
-# Clone repository
-git clone <your-repo-url>
-cd Student-peer-review/Laravel
+# Enter the application container
+docker exec -it student-peer-review-app bash
 
-# Install dependencies
-composer install
-npm install
+# Reset database and populate with test data
+php artisan migrate:fresh --seed --force
 
-# Environment setup
-cp .env.example .env
-php artisan key:generate
-
-# Database setup
-php artisan migrate
-php artisan db:seed
-
-# Build assets
-npm run build
-
-# Start development server
-php artisan serve
+# Or if you want to add data to existing database
+php artisan db:seed --force
 ```
 
-### 🌐 Production Deployment
+**Note**: The `--force` flag is needed because the app is in production mode in Docker.
 
-For production deployment on cloud platforms:
+### 👥 Pre-configured Demo Accounts
 
-1. **Environment Variables**: Update `.env` with production settings
-2. **Database**: Configure production database connection
-3. **Assets**: Run `npm run build` for optimized assets
-4. **Docker**: Use `docker-compose.prod.yml` for production configuration
+After running the seeders, you'll have access to these test accounts (Password: `12341234` for all):
+
+#### 🎓 **Demo Students** 
+| sNumber | Name | Enrolled Courses | Best For |
+|---------|------|------------------|----------|
+| **s111111** | **Bob** | ICT101, ICT102, ICT201 | **Primary demo account** |
+| s222222 | Fred | ICT101, ICT102 | Student collaboration |
+| s333333 | Tony | ICT101 | Basic student view |
+| s444444 | Jim | ICT101 | Review interactions |
+
+#### 🎓 **Factory Students** (Advanced Demo)
+| sNumber | Name | Courses | Reviews | Best For |
+|---------|------|---------|---------|----------|
+| **s320536** | **Jess Buckridge IV** | 4 courses | 11 reviews | **Rich data demo** |
+| s412316 | Sebastian Hill | 4 courses | 9 reviews | Scale demonstration |
+
+#### 👨‍🏫 **Teachers** 
+| sNumber | Name | Role |
+|---------|------|------|
+| **s555555** | **John** | Teacher |
+
+### 📊 Generated Sample Data
+
+The seeder creates:
+- **📚 20 Courses** - Demo + factory generated courses
+- **📝 55+ Assessments** - Various peer review assignments
+- **👥 113 Users** - Mix of demo and factory accounts
+- **📋 244+ Enrollments** - Realistic course enrollments
+- **⭐ 367+ Reviews** - Meaningful peer reviews with proper relationships
+
+### 🔧 Resetting Test Data
+
+To start fresh with clean test data:
+
+```bash
+# Enter container
+docker exec -it student-peer-review-app bash
+
+# Reset database and reseed
+php artisan migrate:fresh --seed
+```
+
+**📸 Test Data Screenshots:**
+![Demo Login](screenshots/demo-login.png)
+*Screenshot showing login with demo account*
+
+![Sample Course Data](screenshots/sample-course-data.png)
+*Screenshot of courses populated with test data*
 
 ## 📁 Project Structure
 

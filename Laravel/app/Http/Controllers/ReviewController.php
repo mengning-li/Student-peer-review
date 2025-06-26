@@ -18,6 +18,7 @@ class ReviewController extends Controller
     public function store(Request $request, $course_id, $assessment_id)
     {
         $request->validate([
+            'reviewee_id' => 'required|exists:users,id',
             'review_content' => [
                 'required',
                 function ($attribute, $value, $fail) {
@@ -29,6 +30,21 @@ class ReviewController extends Controller
             'score' => 'nullable|integer|min:0|max:100',
         ]);
         
+        // Check if review already exists
+        $existingReview = Review::where([
+            'assessment_id' => $assessment_id,
+            'reviewer_id' => auth()->id(),
+            'reviewee_id' => $request->reviewee_id,
+        ])->first();
+        
+        if ($existingReview) {
+            return redirect()->back()->with('error', 'You have already reviewed this student for this assessment.');
+        }
+        
+        // Prevent self-review
+        if (auth()->id() == $request->reviewee_id) {
+            return redirect()->back()->with('error', 'You cannot review yourself.');
+        }
 
         // Create new review
         Review::create([
@@ -39,7 +55,7 @@ class ReviewController extends Controller
             'score' => $request->score,
         ]);
 
-        return redirect()->back();
+        return redirect()->back()->with('success', 'Review submitted successfully!');
     }
 
     // New: Store rating and feedback for a received review

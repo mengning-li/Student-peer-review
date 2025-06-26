@@ -19,7 +19,7 @@ class UserFactory extends Factory
             'email' => $this->faker->unique()->safeEmail(),
             'sNumber' => $this->faker->unique()->regexify('s[0-9]{6}'),
             'role' => $this->faker->randomElement(['student', 'teacher']),
-            'password' => bcrypt('defaultPassword'), // Default password for seeding
+            'password' => bcrypt('12341234'), 
             'created_at' => now(),
             'updated_at' => now(),
         ];

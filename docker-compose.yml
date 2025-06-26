@@ -16,8 +16,8 @@ services:
       - ./Laravel/database:/var/www/html/Laravel/database
     environment:
       - APP_NAME=Student Peer Review
-      - APP_ENV=production
-      - APP_DEBUG=false
+      - APP_ENV=local
+      - APP_DEBUG=true
       - DB_CONNECTION=sqlite
       - DB_DATABASE=/var/www/html/Laravel/database/database.sqlite
     depends_on:
@@ -37,25 +37,6 @@ services:
     networks:
       - student-review-network
 
-  # MySQL Database (alternative to SQLite for production)
-  mysql:
-    image: mysql:8.0
-    container_name: student-peer-review-mysql
-    restart: unless-stopped
-    environment:
-      MYSQL_DATABASE: student_peer_review
-      MYSQL_ROOT_PASSWORD: rootpassword
-      MYSQL_USER: laravel
-      MYSQL_PASSWORD: laravelpassword
-    ports:
-      - "3306:3306"
-    volumes:
-      - mysql_data:/var/lib/mysql
-      - ./docker/mysql/init:/docker-entrypoint-initdb.d
-    networks:
-      - student-review-network
-
-  # Nginx (alternative web server)
   nginx:
     image: nginx:alpine
     container_name: student-peer-review-nginx
@@ -75,27 +56,7 @@ services:
     profiles:
       - nginx
 
-  # phpMyAdmin for database management
-  phpmyadmin:
-    image: phpmyadmin/phpmyadmin
-    container_name: student-peer-review-phpmyadmin
-    restart: unless-stopped
-    environment:
-      PMA_HOST: mysql
-      PMA_USER: root
-      PMA_PASSWORD: rootpassword
-    ports:
-      - "8080:80"
-    depends_on:
-      - mysql
-    networks:
-      - student-review-network
-    profiles:
-      - database-admin
-
 volumes:
-  mysql_data:
-    driver: local
   redis_data:
     driver: local
 
