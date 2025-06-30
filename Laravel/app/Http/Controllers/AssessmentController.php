@@ -174,6 +174,24 @@ class AssessmentController extends Controller
         return redirect()->route('course.detail', $course_id);
     }
 
+    // Method to delete assessment
+    public function destroy($course_id, $assessment_id)
+    {
+        // Find the assessment by ID
+        $assessment = Assessment::findOrFail($assessment_id);
+        
+        // Check if user is authorized (teacher role)
+        if (auth()->user()->role !== 'teacher') {
+            abort(403, 'Unauthorized action.');
+        }
+
+        // Delete the assessment (cascade deletes will handle related data)
+        $assessment->delete();
+
+        // Redirect back to course detail with success message
+        return redirect()->route('course.detail', $course_id)->with('success', 'Assessment deleted successfully.');
+    }
+
     // Function to show details of a specific student (reviews submitted and received)
     public function showStudent($course_id, $assessment_id, $student_id)
     {

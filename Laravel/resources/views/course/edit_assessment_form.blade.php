@@ -66,6 +66,31 @@
                         </div>
 
                     </form>
+
+                    <!-- Delete Assessment Section -->
+                    <div class="mt-6 pt-6 border-t border-gray-200">
+                        <form id="delete-assessment-form" action="{{ route('assessment.delete', [$course->id, $assessment->id]) }}" method="POST" style="display: inline;">
+                            @csrf
+                            @method('DELETE')
+                            <button type="button" onclick="confirmDelete()" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                                {{ __('Delete Assessment') }}
+                            </button>
+                        </form>
+                        <p class="text-sm text-gray-600 mb-4">
+                            {{ __('Once you delete this assessment, all related reviews and scores will be permanently deleted. This action cannot be undone.') }}
+                        </p>
+                        
+                        
+                    </div>
+
+                    <script>
+                        function confirmDelete() {
+                            if (confirm('Are you sure you want to delete this assessment? This action cannot be undone and will delete all related reviews and scores.')) {
+                                document.getElementById('delete-assessment-form').submit();
+                            }
+                        }
+                    </script>
+
                 </div>
             </div>
         </div>

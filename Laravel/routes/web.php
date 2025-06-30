@@ -27,6 +27,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/course/{id}/assessments', [AssessmentController::class, 'store'])->name('assessments.store');
     Route::get('/course/{course}/assessment/{assessment}/edit', [AssessmentController::class, 'edit'])->name('assessment.edit');
     Route::put('/course/{course_id}/assessments/{assessment_id}', [AssessmentController::class, 'update'])->name('assessment.update');
+    Route::delete('/course/{course_id}/assessments/{assessment_id}', [AssessmentController::class, 'destroy'])->name('assessment.delete');
     Route::get('/course/{course_id}/assessment/{assessment_id}', [AssessmentController::class, 'show'])->name('assessment.detail');
     
     // Student management routes
